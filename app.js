@@ -9,6 +9,8 @@ let state = load();
 let editingId = null;
 let cloud = null, cloudUser = null, syncReady = false, syncTimer = null, supActive = null, onlineWorkers = [];
 const CLOUD_FLAG = "linkonCloud";
+let installEvt = null;
+window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); installEvt = e; $("installBtn").hidden = false; });
 
 function load() {
   const fresh = { employee: { name: "", id: "" }, month: new Date().toISOString().slice(0, 7),
@@ -62,7 +64,7 @@ function renderSummary() {
   const recs = monthRecords(), g = { Day: [0, 0], Night: [0, 0], Friday: [0, 0], Custom: [0, 0] };
   let total = 0;
   recs.forEach(r => { const k = groupOf(r.shift); g[k][0] += r.hours; g[k][1]++; total += r.hours; });
-  $("totalHours").textContent = fmt(total);
+  countUp($("totalHours"), total);
   const who = state.employee.name ? `${state.employee.name}${state.employee.id ? " (" + state.employee.id + ")" : ""} · ` : "";
   $("totalLabel").textContent = `${who}${monthName(state.month)}`;
   const icon = { Day: "☀️", Night: "🌙", Friday: "🌟", Custom: "✏️" };
@@ -81,7 +83,7 @@ function renderDayGrid() {
   const [y, m] = state.month.split("-").map(Number), days = new Date(y, m, 0).getDate(), perDay = {}, kind = {};
   monthRecords().forEach(r => { const d = Number(r.date.slice(8)), gk = groupOf(r.shift).toLowerCase(); perDay[d] = (perDay[d] || 0) + r.hours; kind[d] = kind[d] && kind[d] !== gk ? "mixed" : gk; });
   let html = "";
-  for (let d = 1; d <= days; d++) html += `<div class="day${perDay[d] ? " has g-" + kind[d] : ""}"><span>${d}</span><b>${perDay[d] ? fmt(perDay[d]) : "–"}</b></div>`;
+  for (let d = 1; d <= days; d++) html += `<div class="day${perDay[d] ? " has g-" + kind[d] : ""}" style="--i:${d}"><span>${d}</span><b>${perDay[d] ? fmt(perDay[d]) : "–"}</b></div>`;
   $("dayGrid").innerHTML = html + `<div class="legend"><i class="g-day"></i>Day <i class="g-night"></i>Night <i class="g-friday"></i>Friday <i class="g-custom"></i>Custom <i class="g-mixed"></i>Mixed</div><p class="empty">${days} days in ${monthName(state.month)}. Hours worked are shown under each day.</p>`;
 }
 const num = v => { const n = parseFloat(v); return n > 0 ? n : 0; };
@@ -286,6 +288,12 @@ async function addByCode() {
 async function shareText(title, text) {
   try { if (navigator.share) await navigator.share({ title, text }); else { await navigator.clipboard.writeText(text); toast("Copied."); } } catch (err) { /* cancelled */ }
 }
+function countUp(el, to) {
+  const from = parseFloat(el.dataset.v || "0") || 0; el.dataset.v = to;
+  if (from === to || matchMedia("(prefers-reduced-motion: reduce)").matches) { el.textContent = fmt(to); return; }
+  const t0 = performance.now();
+  (function step(t) { const k = Math.min(1, (t - t0) / 700), ease = 1 - Math.pow(1 - k, 3); el.textContent = fmt(from + (to - from) * ease); if (k < 1) requestAnimationFrame(step); })(t0);
+}
 function renderAvatar() { const src = state.avatar || "profile.jpg"; $("avatarTop").src = src; $("avatarBig").src = src; }
 function handleAvatarFile(file) {
   const img = new Image(), url = URL.createObjectURL(file);
@@ -406,6 +414,7 @@ document.addEventListener("DOMContentLoaded", () => {
   $("teamClear").onclick = () => { if (team.length && confirm("Remove all workers from the team view? Their own phones are not affected.")) { team = []; saveTeam(); renderTeam(); } };
   $("teamList").onclick = e => { const i = e.target.dataset.teamdel; if (i !== undefined && confirm("Remove this worker from the team view?")) { team.splice(Number(i), 1); saveTeam(); renderTeam(); } };
   $("inviteBtn").onclick = shareApp;
+  $("installBtn").onclick = async () => { if (!installEvt) return; installEvt.prompt(); try { await installEvt.userChoice; } catch (e) { /* ignore */ } installEvt = null; $("installBtn").hidden = true; };
   $("slipBtn").onclick = showSlip; $("slipPrint").onclick = () => window.print(); $("slipShare").onclick = shareSlip;
   $("slipClose").onclick = () => { $("slip").hidden = true; document.body.classList.remove("slip-open"); };
   $("avatarBtn").onclick = () => $("avatarFile").click();

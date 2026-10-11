@@ -87,3 +87,29 @@ details{margin:10px 0}summary{cursor:pointer;color:var(--brand);font-weight:600;
 
 .codebox{word-break:break-all;font-family:monospace;font-size:20px;letter-spacing:2px;background:var(--bg);border:1px dashed var(--brand2);border-radius:12px;padding:10px;margin:6px 0;color:var(--text)}
 #supPay p,#acctIn p{margin:8px 0}
+
+/* ---- Motion (switched off automatically for people who prefer reduced motion) */
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes pop{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:none}}
+@keyframes slideIn{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:none}}
+@keyframes flow{0%{background-position:0 50%}50%{background-position:100% 50%}100%{background-position:0 50%}}
+@keyframes logoIn{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:none}}
+@keyframes glow{0%,100%{box-shadow:0 10px 40px rgba(0,0,0,.3)}50%{box-shadow:0 10px 50px rgba(255,255,255,.45)}}
+.card,.banner{animation:rise .5s ease both}
+section>.card:nth-child(2),.banner+.card{animation-delay:.08s}
+section>.card:nth-child(3){animation-delay:.16s}
+section>.card:nth-child(4){animation-delay:.24s}
+section>.card:nth-child(n+5){animation-delay:.3s}
+.total{background-size:200% 200%;animation:rise .5s ease both,flow 9s ease-in-out infinite}
+.day{animation:pop .35s ease both;animation-delay:calc(var(--i,0)*14ms)}
+.rec{animation:slideIn .3s ease both}
+.tile{animation:pop .4s ease both}.t-day{animation-delay:.05s}.t-night{animation-delay:.12s}.t-friday{animation-delay:.19s}.t-custom{animation-delay:.26s}
+.splash-logo{animation:logoIn .6s ease both,glow 2.4s ease-in-out .6s infinite}
+#splash h1{animation:rise .6s .25s ease both}#splash p{animation:rise .6s .4s ease both}#splash .by{animation:rise .6s .55s ease both}
+button{transition:transform .12s ease,background .2s ease,box-shadow .2s ease}
+button:active{transform:scale(.96)}
+button.primary:active{box-shadow:0 0 0 4px rgba(33,150,243,.25)}
+.tabs button{transition:background .25s ease,color .25s ease}
+#toast{transform:translate(-50%,12px);transition:opacity .25s ease,transform .25s ease}#toast.show{transform:translate(-50%,0)}
+#slip:not([hidden]){animation:rise .3s ease both}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}

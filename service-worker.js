@@ -1,5 +1,5 @@
 // Bump CACHE_VERSION whenever any app file changes.
-const CACHE_VERSION = "pakiza-ot-v13";
+const CACHE_VERSION = "pakiza-ot-v15";
 const FILES = ["./", "index.html", "style.css", "app.js", "manifest.json", "icon-192.png", "icon-512.png", "banner.jpg", "profile.jpg", "cloud.js", "firebase-config.js"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE_VERSION).then(c => c.addAll(FILES))); self.skipWaiting(); });
 self.addEventListener("activate", e => e.waitUntil(
